@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Exams - Online Exam System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="public/manageque.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/admin-dashboard">
+                <i class="fas fa-arrow-left me-2"></i>Online Exam System - Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">Welcome, <span id="adminName"></span></span>
+                <button class="btn btn-outline-light" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-main">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-clipboard-list me-3"></i>Exam Management</h1>
+            <p>Create, edit, and manage vocational training exams</p>
+            <div class="context-info">
+                <div class="context-item">
+                    <label>College ID</label>
+                    <span id="collegeIdDisplay">-</span>
+                </div>
+                <div class="context-item">
+                    <label>User ID</label>
+                    <span id="userIdDisplay">-</span>
+                </div>
+                <div class="context-item">
+                    <label>Branch</label>
+                    <span id="branchDisplay">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Controls -->
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="ðŸ” Search exams...">
+                </div>
+                <button class="btn-custom btn-create-exam me-3" onclick="createNewExam()">
+                    <i class="fas fa-plus me-2"></i>Create New Exam
+                </button>
+                <button class="btn btn-outline-primary" onclick="refreshExams()">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error" style="display: none;"></div>
+            
+            <!-- Loading Message -->
+            <div id="loadingMessage" class="loading">
+                <div style="font-size: 2rem; margin-bottom: 10px;">â³</div>
+                Loading exams...
+            </div>
+
+            <!-- Exams Container -->
+            <div id="examsContainer" class="exams-grid" style="display: none;">
+                <!-- Exams will be loaded here --
+            </div>
+
+            <!-- No Exams Message -->
+            <div id="noExamsMessage" class="no-exams" style="display: none;">
+                <h3>ðŸ“ No Exams Found</h3>
+                <p>No exams available for the current context. Create your first exam!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Exam Modal -->
+    <div class="modal fade" id="examModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="examModalTitle">Create New Exam</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="examForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="examTitle" class="form-label">Exam Title *</label>
+                                    <input type="text" class="form-control" id="examTitle" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="examDuration" class="form-label">Duration (minutes) *</label>
+                                    <input type="number" class="form-control" id="examDuration" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="examCategory" class="form-label">Category *</label>
+                                    <select class="form-select" id="examCategory" required>
+                                        <option value="">Select Category</option>
+                                        <option value="electrical">Electrical</option>
+                                        <option value="mechanical">Mechanical</option>
+                                        <option value="civil">Civil</option>
+                                        <option value="computer">Computer</option>
+                                        <option value="general">General Knowledge</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="examStatus" class="form-label">Status *</label>
+                                    <select class="form-select" id="examStatus" required>
+                                        <option value="draft">Draft</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="examCollegeId" class="form-label">College ID</label>
+                                    <input type="text" class="form-control" id="examCollegeId">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="examBranch" class="form-label">Branch</label>
+                                    <input type="text" class="form-control" id="examBranch">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="examDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="examDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveExam()">
+                        <i class="fas fa-save me-2"></i>Save Exam
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+<!-- Question Management Modal -->
+<div class="modal fade" id="questionModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="questionModalTitle">Manage Questions</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <button class="btn btn-success" onclick="addNewQuestion()">
+                            <i class="fas fa-plus me-2"></i>Add New Question
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Add Question Form -->
+                <div class="card mb-4" id="addQuestionCard" style="display: none;">
+                    <div class="card-header">
+                        <h6><i class="fas fa-question-circle me-2"></i>Add New Question</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="questionForm">
+                            <!-- Question Input Method Selection -->
+                            <div class="mb-3">
+                                <label class="form-label">Question Input Method *</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="questionMethod" id="methodText" value="text" checked>
+                                    <label class="btn btn-outline-primary" for="methodText">
+                                        <i class="fas fa-keyboard me-2"></i>Type Question
+                                    </label>
+                                    <input type="radio" class="btn-check" name="questionMethod" id="methodPhoto" value="photo">
+                                    <label class="btn btn-outline-primary" for="methodPhoto">
+                                        <i class="fas fa-camera me-2"></i>Upload Photo
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Text Question Input -->
+                            <div class="mb-3" id="textQuestionContainer">
+                                <label for="questionText" class="form-label">Question Text *</label>
+                                <textarea class="form-control" id="questionText" rows="3"></textarea>
+                            </div>
+
+                            <!-- Photo Question Input -->
+                            <div class="mb-3" id="photoQuestionContainer" style="display: none;">
+                                <label for="questionPhoto" class="form-label">Upload Question Photo *</label>
+                                <input type="file" class="form-control" id="questionPhoto" accept="image/*">
+                                <div class="form-text">Maximum file size: 5MB. Supported formats: JPG, PNG, GIF</div>
+                                <div class="mt-2" id="photoPreview" style="display: none;">
+                                    <img id="previewImage" src="" alt="Question Preview" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; max-height: 300px;">
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePhoto()">
+                                            <i class="fas fa-trash me-1"></i>Remove Photo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="questionType" class="form-label">Question Type *</label>
+                                <select class="form-select" id="questionType" required>
+                                    <option value="multiple-choice">Multiple Choice</option>
+                                    <option value="true-false">True/False</option>
+                                    <option value="descriptive">Discriptive</option>
+                                </select>
+                            </div>
+                            
+                            <div id="optionsContainer">
+                                <label class="form-label">Options</label>
+                                <div class="row" id="optionsList">
+                                    <!-- Options will be added here -->
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-primary" onclick="saveQuestion()">
+                                    <i class="fas fa-save me-2"></i>Save Question
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="cancelAddQuestion()">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Questions List -->
+                <div id="questionsList">
+                    <!-- Questions will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="shared/manage-exam.js"></script>
+        
+</body>
+</html>

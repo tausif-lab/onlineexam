@@ -1,0 +1,218 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Results Analysis Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-bg': '#F5F9FF',
+                        'secondary-blue': '#4A90E2',
+                        'accent-blue': '#2D6CDF',
+                        'text-dark': '#333333',
+                        'light-gray': '#F8F9FA'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-card {
+            background: linear-gradient(135deg, #4A90E2, #2D6CDF);
+        }
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(74, 144, 226, 0.15);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-primary-bg font-sans text-text-dark min-h-screen">
+    <!-- Header -->
+    <div class="gradient-card text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl lg:text-5xl font-bold mb-4">
+                <i class="fas fa-chart-line mr-4"></i>Exam Results Analysis
+            </h1>
+            <p class="text-xl opacity-90">Comprehensive student performance analytics and insights</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Controls Section -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
+            <div class="max-w-md mx-auto">
+                <div class="mb-6">
+                    <label for="examId" class="block text-lg font-semibold text-text-dark mb-3">
+                        Enter Exam ID:
+                    </label>
+                    <input 
+                        type="text" 
+                        id="examId" 
+                        placeholder="e.g., 65f1234567890abcdef12345"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-lg focus:border-secondary-blue focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all"
+                    >
+                </div>
+                <button 
+                    class="w-full bg-secondary-blue hover:bg-accent-blue text-white py-4 px-8 rounded-xl text-lg font-semibold transition-colors hover-lift"
+                    onclick="loadExamResults()"
+                >
+                    <i class="fas fa-chart-line mr-2"></i>Analyze Exam Results
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="hidden text-center py-16" id="loading">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-secondary-blue border-t-transparent mb-6"></div>
+            <p class="text-xl text-gray-600">Loading exam results and generating analysis...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="hidden bg-red-50 border border-red-200 rounded-xl p-6 mb-8 text-center" id="error">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <p class="text-red-700 text-lg" id="errorMessage">
+                Failed to load exam results. Please check the Exam ID and try again.
+            </p>
+        </div>
+
+        <!-- No Data State -->
+        <div class="hidden text-center py-16" id="noData">
+            <div class="text-6xl mb-6">📋</div>
+            <h3 class="text-2xl font-bold text-text-dark mb-4">No Results Found</h3>
+            <p class="text-gray-600 text-lg">No submissions found for this exam. Students haven't taken this exam yet.</p>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="hidden space-y-8">
+            <!-- Exam Info Card -->
+            <div class="bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl shadow-lg text-white p-8" id="examInfo">
+                <h2 class="text-3xl font-bold mb-6" id="examTitle">Exam Title</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center">
+                        <div class="text-sm opacity-80 mb-2">Category</div>
+                        <div class="text-2xl font-bold" id="examCategory">-</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center">
+                        <div class="text-sm opacity-80 mb-2">Duration</div>
+                        <div class="text-2xl font-bold" id="examDuration">-</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center">
+                        <div class="text-sm opacity-80 mb-2">Total Submissions</div>
+                        <div class="text-2xl font-bold" id="totalSubmissions">0</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center">
+                        <div class="text-sm opacity-80 mb-2">Average Score</div>
+                        <div class="text-2xl font-bold" id="averageScore">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="space-y-8">
+                <!-- Performance Chart -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                    <h3 class="text-2xl font-bold text-text-dark mb-8 text-center">
+                        <i class="fas fa-chart-bar mr-3"></i>Student Performance Comparison
+                    </h3>
+                    <div class="relative h-96 mb-6">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Statistics Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 text-center hover-lift border-l-4 border-l-green-500">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                        </div>
+                        <div class="text-4xl font-bold text-green-500 mb-2" id="passCount">0</div>
+                        <div class="text-gray-600 font-semibold uppercase tracking-wide text-sm">Students Passed</div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 text-center hover-lift border-l-4 border-l-red-500">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-times-circle text-red-500 text-2xl"></i>
+                        </div>
+                        <div class="text-4xl font-bold text-red-500 mb-2" id="failCount">0</div>
+                        <div class="text-gray-600 font-semibold uppercase tracking-wide text-sm">Students Failed</div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 text-center hover-lift border-l-4 border-l-secondary-blue">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-percentage text-secondary-blue text-2xl"></i>
+                        </div>
+                        <div class="text-4xl font-bold text-secondary-blue mb-2" id="passRate">0%</div>
+                        <div class="text-gray-600 font-semibold uppercase tracking-wide text-sm">Pass Rate</div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 text-center hover-lift border-l-4 border-l-purple-500">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-chart-line text-purple-500 text-2xl"></i>
+                        </div>
+                        <div class="text-4xl font-bold text-purple-500 mb-2" id="averagePercentage">0%</div>
+                        <div class="text-gray-600 font-semibold uppercase tracking-wide text-sm">Average Percentage</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared/admin-analysis.js"></script>
+    <script>
+        // Show/hide loading states
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('loading').classList.add('block');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('loading').classList.remove('block');
+        }
+
+        function showError(message) {
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function hideError() {
+            document.getElementById('error').classList.add('hidden');
+        }
+
+        function showNoData() {
+            document.getElementById('noData').classList.remove('hidden');
+        }
+
+        function hideNoData() {
+            document.getElementById('noData').classList.add('hidden');
+        }
+
+        function showResults() {
+            document.getElementById('resultsContainer').classList.remove('hidden');
+        }
+
+        function hideResults() {
+            document.getElementById('resultsContainer').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

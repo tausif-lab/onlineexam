@@ -1,0 +1,589 @@
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Online Exam System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-bg': '#F5F9FF',
+                        'secondary-blue': '#4A90E2',
+                        'accent-blue': '#2D6CDF',
+                        'text-dark': '#333333',
+                        'light-gray': '#F8F9FA'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(74, 144, 226, 0.15);
+        }
+        .gradient-card {
+            background: linear-gradient(135deg, #4A90E2, #2D6CDF);
+        }
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(74, 144, 226, 0.1);
+        }
+        .stats-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(74, 144, 226, 0.15);
+            border-color: #4A90E2;
+        }
+    </style>
+</head>
+<body class="bg-primary-bg font-sans text-text-dark min-h-screen">
+    <!-- Navigation --
+    <nav class="bg-secondary-blue shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-white text-2xl font-bold">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        Online Exam System - Admin
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-white text-sm">
+                        Welcome, <span id="adminName" class="font-semibold">Administrator</span>
+                    </span>
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors" onclick="logout()">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header --
+    <div class="gradient-card text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl lg:text-5xl font-bold mb-4">Admin Dashboard</h1>
+                <p class="text-xl opacity-90">CSPDCL Vocational Training Online Exam System</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Statistics Cards --
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stats-card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Total Students</h3>
+                        <p class="text-3xl font-bold text-secondary-blue" id="totalStudents">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-secondary-blue text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Active Exams</h3>
+                        <p class="text-3xl font-bold text-green-500" id="activeExams">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-play-circle text-green-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Completed Exams</h3>
+                        <p class="text-3xl font-bold text-yellow-500" id="completedExams">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-yellow-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Average Score</h3>
+                        <p class="text-3xl font-bold text-cyan-500" id="averageScore">0%</p>
+                    </div>
+                    <div class="w-12 h-12 bg-cyan-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-line text-cyan-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards --
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Manage Exams --
+            <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover-lift cursor-pointer">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-r from-secondary-blue to-accent-blue rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-clipboard-list text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-text-dark mb-4">Manage Exams</h3>
+                    <p class="text-gray-600 text-lg leading-relaxed mb-6">Create, edit, and manage vocational training exams</p>
+                    <button class="bg-secondary-blue hover:bg-accent-blue text-white px-8 py-3 rounded-full font-semibold transition-colors" id="manageExamsBtn">
+                        Manage Exams
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Proctoring --
+            <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-8 shadow-lg hover-lift cursor-pointer" id="openLiveProctoring">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-video text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Live Exam Proctoring</h3>
+                    <p class="text-purple-100 text-lg leading-relaxed mb-6">Monitor students in real-time during exams with video proctoring</p>
+                    <button class="bg-white text-purple-700 px-8 py-3 rounded-full font-semibold hover:bg-purple-50 transition-colors">
+                        <i class="fas fa-eye mr-2"></i>Start Live Monitoring
+                    </button>
+                </div>
+            </div>
+
+            <!-- Manage Users --
+            <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover-lift cursor-pointer">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-users text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-text-dark mb-4">Manage Users</h3>
+                    <p class="text-gray-600 text-lg leading-relaxed mb-6">View and manage student accounts</p>
+                    <button class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full font-semibold transition-colors">
+                        Manage Users
+                    </button>
+                </div>
+            </div>
+
+            <!-- Proctoring Settings --
+            <div class="bg-gradient-to-br from-pink-500 to-red-500 rounded-2xl p-8 shadow-lg hover-lift cursor-pointer" id="openExamchecking">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Answersheets</h3>
+                    <p class="text-pink-100 text-lg leading-relaxed mb-6">Check the answer sheets </p>
+                    <button class="bg-white text-pink-700 px-8 py-3 rounded-full font-semibold hover:bg-pink-50 transition-colors">
+                        <i class="fas fa-cog mr-2"></i>start Checking
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reports & Analytics --
+            <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover-lift cursor-pointer">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-chart-bar text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-text-dark mb-4">Reports & Analytics</h3>
+                    <p class="text-gray-600 text-lg leading-relaxed mb-6">View detailed reports and analytics</p>
+                    <button class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full font-semibold transition-colors" id="admin-analysisBtn">
+                        View Reports
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Settings --
+            <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover-lift cursor-pointer" onclick="systemSettings()">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-cog text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-text-dark mb-4">System Settings</h3>
+                    <p class="text-gray-600 text-lg leading-relaxed mb-6">Configure system settings and preferences</p>
+                    <button class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-semibold transition-colors">
+                        Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity & Live Exams --
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8">
+            <div class="flex justify-between items-center p-6 border-b border-gray-100">
+                <h2 class="text-2xl font-bold text-text-dark">Recent Activity & Live Exams</h2>
+                <button class="bg-secondary-blue hover:bg-accent-blue text-white px-4 py-2 rounded-lg font-medium transition-colors" onclick="refreshActivity()">
+                    <i class="fas fa-refresh mr-2"></i>Refresh
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="recentActivity">
+                    <div class="flex justify-center py-12">
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-secondary-blue border-t-transparent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status --
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
+            <div class="p-6 border-b border-gray-100">
+                <h2 class="text-2xl font-bold text-text-dark">System Status</h2>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4" id="systemStatus">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <div>
+                            <strong class="text-green-800">System Status:</strong>
+                            <span class="text-green-700 ml-2">All systems operational</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4" id="databaseStatus">
+                    <div class="flex items-center">
+                        <i class="fas fa-database text-blue-500 mr-3"></i>
+                        <div>
+                            <strong class="text-blue-800">Database:</strong>
+                            <span class="text-blue-700 ml-2">Connected to MongoDB Atlas</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" id="zoomStatus">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-video text-yellow-500 mr-3"></i>
+                            <div>
+                                <strong class="text-yellow-800">Zoom Integration:</strong>
+                                <span class="text-yellow-700 ml-2" id="zoomStatusText">Checking connection...</span>
+                            </div>
+                        </div>
+                        <button class="bg-secondary-blue hover:bg-accent-blue text-white px-4 py-2 rounded-lg font-medium transition-colors" onclick="checkZoomHealth()">
+                            <i class="fas fa-sync mr-2"></i>Test Zoom API
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal --
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="loadingModal">
+        <div class="bg-white rounded-2xl p-8 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-secondary-blue border-t-transparent mx-auto mb-4"></div>
+            <h6 class="text-lg font-semibold text-text-dark">Loading...</h6>
+        </div>
+    </div>
+
+    <script src="shared/admin.js"></script>
+</body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Online Exam System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-bg': '#F5F9FF',
+                        'secondary-blue': '#4A90E2',
+                        'accent-blue': '#2D6CDF',
+                        'text-dark': '#333333',
+                        'light-gray': '#F8F9FA'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(74, 144, 226, 0.15);
+        }
+        .gradient-card {
+            background: linear-gradient(135deg, #4A90E2, #2D6CDF);
+        }
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(74, 144, 226, 0.1);
+        }
+        .stats-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(74, 144, 226, 0.15);
+            border-color: #4A90E2;
+        }
+    </style>
+</head>
+<body class="bg-primary-bg font-sans text-text-dark min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-secondary-blue shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-white text-2xl font-bold">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        Online Exam System - Admin
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-white text-sm">
+                        Welcome, <span id="adminName" class="font-semibold">Administrator</span>
+                    </span>
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors" onclick="logout()">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <div class="gradient-card text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl lg:text-5xl font-bold mb-4">Admin Dashboard</h1>
+                <p class="text-xl opacity-90">Welcome to the Admin dashborad</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stats-card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Total Students</h3>
+                        <p class="text-3xl font-bold text-secondary-blue" id="totalStudents">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-secondary-blue text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Active Exams</h3>
+                        <p class="text-3xl font-bold text-green-500" id="activeExams">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-play-circle text-green-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Completed Exams</h3>
+                        <p class="text-3xl font-bold text-yellow-500" id="completedExams">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-yellow-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Average Score</h3>
+                        <p class="text-3xl font-bold text-cyan-500" id="averageScore">0%</p>
+                    </div>
+                    <div class="w-12 h-12 bg-cyan-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-line text-cyan-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Manage Exams -->
+            <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-8 shadow-lg border border-gray-100 hover-lift cursor-pointer">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-r from-secondary-white to-accent-white rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-clipboard-list text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Manage Exams</h3>
+                    <p class="text-purple-100 text-lg leading-relaxed mb-6">Create, edit, and manage vocational training exams</p>
+                    <button class="bg-white text-blue-700 px-8 py-3 rounded-full font-semibold hover:bg-purple-50 transition-colors" id="manageExamsBtn">
+                        Manage Exams
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Proctoring -->
+            <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-8 shadow-lg hover-lift cursor-pointer" id="openLiveProctoring">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-video text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Live Exam Proctoring</h3>
+                    <p class="text-purple-100 text-lg leading-relaxed mb-6">Monitor students in real-time during exams with video proctoring</p>
+                    <button class="bg-white text-purple-700 px-8 py-3 rounded-full font-semibold hover:bg-purple-50 transition-colors">
+                        <i class="fas fa-eye mr-2"></i>Start Live Monitoring
+                    </button>
+                </div>
+            </div>
+
+            <!-- Manage Users -->
+            <div class="bg-gradient-to-br from-green-500 to-green-700  rounded-2xl p-8 shadow-lg border border-gray-100 hover-lift cursor-pointer">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-users text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Manage Users</h3>
+                    <p class="text-white text-lg leading-relaxed mb-6">View and manage student accounts</p>
+                    <button class="bg-white text-green-700 px-8 py-3 rounded-full font-semibold hover:bg-green-50 transition-colors">
+                        Manage Users
+                    </button>
+                </div>
+            </div>
+
+            <!-- Proctoring Settings -->
+            <div class="bg-gradient-to-br from-pink-500 to-red-500 rounded-2xl p-8 shadow-lg hover-lift cursor-pointer" id="openExamchecking">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Answersheets</h3>
+                    <p class="text-pink-100 text-lg leading-relaxed mb-6">Check the answer sheets </p>
+                    <button class="bg-white text-pink-700 px-8 py-3 rounded-full font-semibold hover:bg-pink-50 transition-colors">
+                        <i class="fas fa-cog mr-2"></i>start Checking
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reports & Analytics -->
+            <div class="bg-gradient-to-br from-orange-500 to-orange-700  rounded-2xl p-8 shadow-lg border border-gray-100 hover-lift cursor-pointer">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-chart-bar text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Reports & Analytics</h3>
+                    <p class="text-orange-100 text-lg leading-relaxed mb-6">View detailed reports and analytics</p>
+                    <button class="bg-white  text-orange-700 px-8 py-3 rounded-full font-semibold hover:bg-orange-50 transition-colors" id="admin-analysisBtn">
+                        View Reports
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl p-8 shadow-lg border border-gray-100 hover-lift cursor-pointer" onclick="systemSettings()">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-cog text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">System Settings</h3>
+                    <p class="text-gray-100 text-lg leading-relaxed mb-6">Configure system settings and preferences</p>
+                    <button class="bg-white  text-gray-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition-colors">
+                        Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity & Live Exams -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8">
+            <div class="flex justify-between items-center p-6 border-b border-gray-100">
+                <h2 class="text-2xl font-bold text-text-dark">Recent Activity & Live Exams</h2>
+                <button class="bg-secondary-blue hover:bg-accent-blue text-white px-4 py-2 rounded-lg font-medium transition-colors" onclick="refreshActivity()">
+                    <i class="fas fa-refresh mr-2"></i>Refresh
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="recentActivity">
+                    <div class="flex justify-center py-12">
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-secondary-blue border-t-transparent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
+            <div class="p-6 border-b border-gray-100">
+                <h2 class="text-2xl font-bold text-text-dark">System Status</h2>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4" id="systemStatus">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <div>
+                            <strong class="text-green-800">System Status:</strong>
+                            <span class="text-green-700 ml-2">All systems operational</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4" id="databaseStatus">
+                    <div class="flex items-center">
+                        <i class="fas fa-database text-blue-500 mr-3"></i>
+                        <div>
+                            <strong class="text-blue-800">Database:</strong>
+                            <span class="text-blue-700 ml-2">Connected to MongoDB Atlas</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" id="zoomStatus">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-video text-yellow-500 mr-3"></i>
+                            <div>
+                                <strong class="text-yellow-800">Zoom Integration:</strong>
+                                <span class="text-yellow-700 ml-2" id="zoomStatusText">Checking connection...</span>
+                            </div>
+                        </div>
+                        <button class="bg-secondary-blue hover:bg-accent-blue text-white px-4 py-2 rounded-lg font-medium transition-colors" onclick="checkZoomHealth()">
+                            <i class="fas fa-sync mr-2"></i>Test Zoom API
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="loadingModal">
+        <div class="bg-white rounded-2xl p-8 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-secondary-blue border-t-transparent mx-auto mb-4"></div>
+            <h6 class="text-lg font-semibold text-text-dark">Loading...</h6>
+        </div>
+    </div>
+
+    <script src="shared/admin.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Exams</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .context-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .context-item {
+            text-align: center;
+        }
+
+        .context-item label {
+            display: block;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .context-item span {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #4f46e5;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .exams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .exam-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .exam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-color: #4f46e5;
+        }
+
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .exam-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1f2937;
+            flex: 1;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .exam-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .meta-item {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .exam-description {
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.1rem;
+            color: #6b7280;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .no-exams {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .no-exams h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .exams-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Exam Management</h1>
+            <div class="context-info">
+                <div class="context-item">
+                    <label>College ID</label>
+                    <span id="collegeIdDisplay">-</span>
+                </div>
+                <div class="context-item">
+                    <label>User ID</label>
+                    <span id="userIdDisplay">-</span>
+                </div>
+                <div class="context-item">
+                    <label>Branch</label>
+                    <span id="branchDisplay">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search exams...">
+                </div>
+                <button class="btn btn-primary" onclick="createNewExam()">➕ Create New Exam</button>
+                <button class="btn btn-secondary" onclick="refreshExams()">🔄 Refresh</button>
+            </div>
+
+            <div id="errorMessage" class="error" style="display: none;"></div>
+            
+            <div id="loadingMessage" class="loading">
+                <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+                Loading exams...
+            </div>
+
+            <div id="examsContainer" class="exams-grid" style="display: none;">
+                <!-- Exams will be loaded here -->
+            </div>
+
+            <div id="noExamsMessage" class="no-exams" style="display: none;">
+                <h3>📝 No Exams Found</h3>
+                <p>No exams available for the current context. Create your first exam!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentParams = {};
+        let allExams = [];
+        let filteredExams = [];
+        let parameterWatcher = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            extractUrlParameters();
+            setupEventListeners();
+            setupParameterWatcher();
+            loadExams();
+        });
+
+        // Extract URL parameters
+        function extractUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentParams = {
+                collegeId: urlParams.get('collegeId') || '',
+                user1Id: urlParams.get('user1Id') || '',
+                branch: urlParams.get('branch') || ''
+            };
+
+            // Update display
+            document.getElementById('collegeIdDisplay').textContent = currentParams.collegeId || 'Not specified';
+            document.getElementById('userIdDisplay').textContent = currentParams.user1Id || 'Not specified';
+            document.getElementById('branchDisplay').textContent = currentParams.branch || 'Not specified';
+
+            console.log('Current parameters:', currentParams);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                filterExams(e.target.value);
+            });
+            
+            // Handle page visibility changes
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    // Page became visible, check for parameter changes
+                    parameterWatcher.checkForChanges();
+                }
+            });
+        }
+        function setupParameterWatcher() {
+            // Simple parameter watcher implementation
+            parameterWatcher = {
+                start: function() {
+                    // Watch for popstate events
+                    window.addEventListener('popstate', this.handleParameterChange.bind(this));
+                    
+                    // Poll for changes every 500ms for more responsive updates
+                    this.interval = setInterval(this.checkForChanges.bind(this), 500);
+                    
+                    // Watch for programmatic URL changes
+                    this.originalPushState = history.pushState;
+                    this.originalReplaceState = history.replaceState;
+                    
+                    const self = this;
+                    history.pushState = function() {
+                        self.originalPushState.apply(history, arguments);
+                        setTimeout(() => self.handleParameterChange(), 10);
+                    };
+                    
+                    history.replaceState = function() {
+                        self.originalReplaceState.apply(history, arguments);
+                        setTimeout(() => self.handleParameterChange(), 10);
+                    };
+                },
+                
+                checkForChanges: function() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const newParams = {
+                        collegeId: urlParams.get('collegeId') || '',
+                        user1Id: urlParams.get('user1Id') || '',
+                        branch: urlParams.get('branch') || ''
+                    };
+                    
+                    if (JSON.stringify(newParams) !== JSON.stringify(currentParams)) {
+                        this.handleParameterChange();
+                    }
+                },
+                
+                handleParameterChange: function() {
+                    console.log('URL parameters changed, updating page...');
+                    extractUrlParameters();
+                    loadExams();
+                },
+                
+                stop: function() {
+                    if (this.interval) {
+                        clearInterval(this.interval);
+                    }
+                    window.removeEventListener('popstate', this.handleParameterChange.bind(this));
+                    
+                    // Restore original methods
+                    if (this.originalPushState) {
+                        history.pushState = this.originalPushState;
+                    }
+                    if (this.originalReplaceState) {
+                        history.replaceState = this.originalReplaceState;
+                    }
+                }
+            };
+            
+            parameterWatcher.start();
+        }
+
+        // Load exams from API
+        async function loadExams() {
+            showLoading();
+            hideError();
+
+            try {
+                // Construct API URL with parameters
+                const apiUrl = `/api/exams?collegeId=${encodeURIComponent(currentParams.collegeId)}&user1Id=${encodeURIComponent(currentParams.)}&branch=${encodeURIComponent(currentParams.branch)}`;
+                
+                console.log('Fetching exams from:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Adjust based on your auth system
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const exams = await response.json();
+                allExams = exams;
+                filteredExams = [...allExams];
+                
+                console.log('Loaded exams:', exams.length);
+                displayExams(filteredExams);
+
+            } catch (error) {
+                console.error('Error loading exams:', error);
+                showError('Failed to load exams. Please try again.');
+                displayExams([]);
+            }
+        }
+
+        // Filter exams based on search
+        function filterExams(searchTerm) {
+            if (!searchTerm.trim()) {
+                filteredExams = [...allExams];
+            } else {
+                const term = searchTerm.toLowerCase();
+                filteredExams = allExams.filter(exam => 
+                    exam.title.toLowerCase().includes(term) ||
+                    exam.category.toLowerCase().includes(term) ||
+                    exam.description.toLowerCase().includes(term) ||
+                    exam.createdBy.toLowerCase().includes(term)
+                );
+            }
+            displayExams(filteredExams);
+        }
+
+        // Display exams in the grid
+        function displayExams(exams) {
+            hideLoading();
+            
+            const container = document.getElementById('examsContainer');
+            const noExamsMessage = document.getElementById('noExamsMessage');
+
+            if (exams.length === 0) {
+                container.style.display = 'none';
+                noExamsMessage.style.display = 'block';
+                return;
+            }
+
+            noExamsMessage.style.display = 'none';
+            container.style.display = 'grid';
+
+            container.innerHTML = exams.map(exam => `
+                <div class="exam-card" data-exam-id="${exam.id}">
+                    <div class="exam-header">
+                        <h3 class="exam-title">${escapeHtml(exam.title)}</h3>
+                        <span class="status-badge status-${exam.status}">${exam.status}</span>
+                    </div>
+                    
+                    <div class="exam-meta">
+                        <div class="meta-item">
+                            <div>Category: <span class="meta-value">${escapeHtml(exam.category)}</span></div>
+                        </div>
+                        <div class="meta-item">
+                            <div>Duration: <span class="meta-value">${exam.duration} min</span></div>
+                        </div>
+                        <div class="meta-item">
+                            <div>Questions: <span class="meta-value">${exam.questionCount}</span></div>
+                        </div>
+                        <div class="meta-item">
+                            <div>Created: <span class="meta-value">${formatDate(exam.createdAt)}</span></div>
+                        </div>
+                    </div>
+
+                    ${exam.description ? `<div class="exam-description">${escapeHtml(exam.description)}</div>` : ''}
+                    
+                    <div class="exam-actions">
+                        <button class="btn btn-primary" onclick="editExam('${exam.id}')">✏️ Edit</button>
+                        <button class="btn btn-secondary" onclick="manageQuestions('${exam.id}')">❓ Questions</button>
+                        <button class="btn btn-danger" onclick="deleteExam('${exam.id}', '${escapeHtml(exam.title)}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('examsContainer').style.display = 'none';
+            document.getElementById('noExamsMessage').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        // Action functions
+        function refreshExams() {
+            loadExams();
+        }
+
+        function createNewExam() {
+            const params = new URLSearchParams(currentParams);
+            window.location.href = `/create-exam.html?${params.toString()}`;
+        }
+
+        function editExam(examId) {
+            const params = new URLSearchParams({...currentParams, examId});
+            window.location.href = `/edit-exam.html?${params.toString()}`;
+        }
+
+        function manageQuestions(examId) {
+            const params = new URLSearchParams({...currentParams, examId});
+            window.location.href = `/manage-questions.html?${params.toString()}`;
+        }
+
+        async function deleteExam(examId, examTitle) {
+            if (!confirm(`Are you sure you want to delete the exam "${examTitle}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/exams/${examId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                console.log('Exam deleted successfully');
+                loadExams(); // Reload exams list
+
+            } catch (error) {
+                console.error('Error deleting exam:', error);
+                showError('Failed to delete exam. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

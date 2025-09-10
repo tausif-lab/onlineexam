@@ -1,0 +1,109 @@
+/* Custom styles for Online Exam System */
+
+.custom-text-color {
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.custom-carousel {
+    max-height: 400px;
+    margin: 20px auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.custom-carousel img {
+    height: 400px;
+    object-fit: cover;
+}
+
+.center-btns {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.btn-custom {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-custom:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-custom a {
+    color: white;
+    text-decoration: none;
+}
+
+.btn-custom a:hover {
+    color: white;
+    text-decoration: none;
+}
+
+/* Logo styling */
+.col img {
+    max-width: 100px;
+    height: auto;
+}
+
+/* Alert styling */
+.alert-primary {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    color: #0d47a1;
+}
+
+/* Developer info styling */
+h5 {
+    color: #2c3e50;
+    margin-top: 30px;
+    font-weight: bold;
+}
+
+ul {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
+}
+
+ul li {
+    margin-bottom: 8px;
+    color: #34495e;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .center-btns {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-custom {
+        width: 200px;
+        margin-bottom: 10px;
+    }
+    
+    .custom-carousel {
+        margin: 10px;
+    }
+    
+    .custom-carousel img {
+        height: 250px;
+    }
+}

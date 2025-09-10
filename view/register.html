@@ -1,0 +1,488 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Online Exam System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Face-api.js CDN -->
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>-->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(165deg, #39a9d9, #526bd9, #9fa6c1);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .register-box {
+      width: 100%;
+      max-width: 480px;
+      padding: 35px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+      color: #fff;
+    }
+
+    .register-box h3 {
+      color: #e0f0ff;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #d2e9ff;
+    }
+
+    .form-control, .form-select {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      border-radius: 12px;
+    }
+
+    .form-control::placeholder {
+      color: #cbd6e2;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: rgba(255, 255, 255, 0.25);
+      outline: none;
+      border-color: #4da8da;
+      box-shadow: 0 0 0 0.25rem rgba(77, 168, 218, 0.3);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4da8da, #0077b6);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0077b6, #023e8a);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 119, 182, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .alert {
+      border-radius: 12px;
+    }
+
+    #video {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .face-enrollment-section {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 15px 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .face-status {
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+
+    .face-status.success {
+      background: rgba(40, 167, 69, 0.2);
+      border: 1px solid rgba(40, 167, 69, 0.4);
+      color: #90ee90;
+    }
+
+    .face-status.error {
+      background: rgba(220, 53, 69, 0.2);
+      border: 1px solid rgba(220, 53, 69, 0.4);
+      color: #ffb3ba;
+    }
+
+    .face-status.loading {
+      background: rgba(255, 193, 7, 0.2);
+      border: 1px solid rgba(255, 193, 7, 0.4);
+      color: #fff3cd;
+    }
+
+    a {
+      color: #90e0ef;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #48cae4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="register-box">
+    <h3 class="text-center mb-4">Registration</h3>
+    <form id="registrationForm">
+      <div class="mb-3">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="fullName" class="form-control" placeholder="Enter your full name" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">College ID</label>
+        <input type="text" id="collegeId" class="form-control" placeholder="Enter your college ID" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">User ID</label>
+        <input type="number" id="user1Id" class="form-control" placeholder="Enter your user ID" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="Enter the password" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm your password" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Branch</label>
+        <select id="branch" class="form-select" required>
+          <option value="">Select Branch</option>
+          <option value="CSE">CSE</option>
+          <option value="EC">EC</option>
+          <option value="EEE">EEE</option>
+          <option value="MECH">MECH</option>
+          <option value="CIVIL">CIVIL</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Role</label>
+        <select id="role" class="form-select" required>
+          <option value="">Select Role</option>
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <!-- Face Enrollment Section -->
+      <div id="faceEnrollmentSection" class="face-enrollment-section" style="display: none;">
+        <h5 class="text-center mb-3">Face Enrollment Required</h5>
+        <div class="text-center">
+          <video id="video" autoplay muted style="display: none;"></video>
+          <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+        <div id="faceStatus" class="face-status loading" style="display: none;">
+          Loading face detection models...
+        </div>
+        <div class="text-center mt-3">
+          <button type="button" id="startCamera" class="btn btn-warning" style="display: none;">
+            Start Camera
+          </button>
+          <button type="button" id="captureFace" class="btn btn-success" style="display: none;">
+            Capture Face
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn btn-primary w-100 mb-3" disabled>
+        Register
+      </button>
+      <p class="text-center">Already registered? <a href="/login">Login</a></p>
+    </form>
+    <div id="message"></div>
+  </div>
+
+
+   
+
+<script>
+    let faceEmbedding = null;
+    let modelsLoaded = false;
+    let stream = null;
+    let faceApiLoaded = false;
+
+    // Wait for face-api.js to load
+    function waitForFaceApi() {
+      return new Promise((resolve) => {
+        if (typeof faceapi !== 'undefined') {
+          resolve();
+        } else {
+          const checkInterval = setInterval(() => {
+            if (typeof faceapi !== 'undefined') {
+              clearInterval(checkInterval);
+              resolve();
+            }
+          }, 100);
+        }
+      });
+    }
+
+    // Load face-api models
+    async function loadModels() {
+      try {
+        // Wait for face-api.js to be available
+        await waitForFaceApi();
+        
+        document.getElementById('faceStatus').textContent = 'Loading face detection models...';
+        document.getElementById('faceStatus').className = 'face-status loading';
+        
+        const MODEL_URL = '/models'; // Try local models first
+        
+        try {
+          await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+          ]);
+        } catch (localError) {
+          // Fallback to CDN models
+          console.log('Local models not found, trying CDN...');
+          const CDN_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+          
+          await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(CDN_MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(CDN_MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(CDN_MODEL_URL)
+          ]);
+        }
+        
+        modelsLoaded = true;
+        faceApiLoaded = true;
+        document.getElementById('faceStatus').textContent = 'Face detection ready. Click "Start Camera" to begin.';
+        document.getElementById('faceStatus').className = 'face-status success';
+        document.getElementById('startCamera').style.display = 'inline-block';
+      } catch (error) {
+        console.error('Error loading models:', error);
+        document.getElementById('faceStatus').textContent = 'Error loading face detection models. Please refresh the page.';
+        document.getElementById('faceStatus').className = 'face-status error';
+      }
+    }
+
+    // Handle role change
+    document.getElementById('role').addEventListener('change', function() {
+      const role = this.value;
+      const faceSection = document.getElementById('faceEnrollmentSection');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      if (role === 'student') {
+        faceSection.style.display = 'block';
+        document.getElementById('faceStatus').style.display = 'block';
+        submitBtn.disabled = true;
+        if (!modelsLoaded) {
+          loadModels();
+        }
+      } else {
+        faceSection.style.display = 'none';
+        submitBtn.disabled = false;
+        faceEmbedding = null;
+        stopCamera();
+      }
+    });
+
+    // Start camera
+    document.getElementById('startCamera').addEventListener('click', async function() {
+      try {
+        const constraints = {
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: 'user'
+          }
+        };
+        
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('video');
+        video.srcObject = stream;
+        video.style.display = 'block';
+        
+        // Wait for video to be ready
+        await new Promise(resolve => {
+          video.onloadedmetadata = () => resolve();
+        });
+        
+        document.getElementById('startCamera').style.display = 'none';
+        document.getElementById('captureFace').style.display = 'inline-block';
+        document.getElementById('faceStatus').textContent = 'Position your face in the camera and click "Capture Face"';
+        document.getElementById('faceStatus').className = 'face-status loading';
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        document.getElementById('faceStatus').textContent = 'Error accessing camera. Please check permissions.';
+        document.getElementById('faceStatus').className = 'face-status error';
+      }
+    });
+
+    // Capture face
+    document.getElementById('captureFace').addEventListener('click', async function() {
+      if (!faceApiLoaded) {
+        document.getElementById('faceStatus').textContent = 'Face detection models not loaded. Please wait.';
+        document.getElementById('faceStatus').className = 'face-status error';
+        return;
+      }
+
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      
+      try {
+        document.getElementById('faceStatus').textContent = 'Detecting face...';
+        document.getElementById('faceStatus').className = 'face-status loading';
+        
+        const detections = await faceapi
+          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+        
+        if (detections) {
+          faceEmbedding = Array.from(detections.descriptor);
+          document.getElementById('faceStatus').textContent = 'Face captured successfully! You can now register.';
+          document.getElementById('faceStatus').className = 'face-status success';
+          document.getElementById('submitBtn').disabled = false;
+          document.getElementById('captureFace').style.display = 'none';
+          stopCamera();
+        } else {
+          document.getElementById('faceStatus').textContent = 'No face detected. Please try again.';
+          document.getElementById('faceStatus').className = 'face-status error';
+        }
+      } catch (error) {
+        console.error('Error detecting face:', error);
+        document.getElementById('faceStatus').textContent = 'Error detecting face. Please try again.';
+        document.getElementById('faceStatus').className = 'face-status error';
+      }
+    });
+
+    // Stop camera
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      document.getElementById('video').style.display = 'none';
+    }
+
+    // Registration form submission
+    document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const fullName = document.getElementById('fullName').value;
+      const collegeId = document.getElementById('collegeId').value;
+      const user1Id = document.getElementById('user1Id').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const role = document.getElementById('role').value;
+      const branch = document.getElementById('branch').value;
+      const messageDiv = document.getElementById('message');
+
+      messageDiv.innerHTML = '';
+
+      // Validation
+      if (!fullName || !email || !collegeId || !user1Id || !password || !confirmPassword || !role || !branch) {
+        showMessage('Please fill in all fields', 'danger');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage('Passwords do not match', 'danger');
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage('Password must be at least 6 characters long', 'danger');
+        return;
+      }
+
+      if (role === 'student' && !faceEmbedding) {
+        showMessage('Face enrollment is required for students', 'danger');
+        return;
+      }
+
+      try {
+        const requestBody = { 
+          fullName, email, collegeId, user1Id, password, confirmPassword, branch, role 
+        };
+        
+        if (role === 'student' && faceEmbedding) {
+          requestBody.faceEmbedding = faceEmbedding;
+        }
+
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('Registration successful! Redirecting to login...', 'success');
+          document.getElementById('registrationForm').reset();
+          stopCamera();
+
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
+        } else {
+          showMessage(data.message || 'Registration failed', 'danger');
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        showMessage('Network error. Please try again.', 'danger');
+      }
+    });
+
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+      stopCamera();
+    });
+
+    // Check if face-api.js loaded on page load
+    window.addEventListener('load', function() {
+      if (typeof faceapi === 'undefined') {
+        console.warn('face-api.js not loaded from CDN, trying alternative...');
+        // You could load a local copy or show error message
+      }
+    });
+</script>
+  
+</body>
+</html>

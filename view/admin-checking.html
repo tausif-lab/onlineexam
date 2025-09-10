@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Canvas Scoring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .canvas-image {
+            max-width: 100%;
+            max-height: 400px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .scored {
+            background-color: #dcfce7;
+            border-color: #16a34a;
+        }
+        
+        .unscored {
+            background-color: #fef3c7;
+            border-color: #d97706;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Canvas Answer Scoring</h1>
+        
+        <!-- Exam ID Input Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex gap-4 items-end">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Exam ID</label>
+                    <input 
+                        type="text" 
+                        id="examId" 
+                        placeholder="Enter exam ID to load submissions"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <button 
+                    id="loadSubmissionsBtn"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a4 4 0 11-8-4.5 4 4 0 018 4.5z"></path>
+                    </svg>
+                    Load Submissions
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden text-center py-8">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading submissions...</p>
+        </div>
+
+        <!-- Submissions List -->
+        <div id="submissionsList" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Submissions</h2>
+                <span id="submissionCount" class="text-gray-600"></span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MCQ Score</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Canvas Answers</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scoring Progress</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Final Score</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Submissions will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Scoring Interface -->
+        <div id="scoringInterface" class="hidden bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-xl font-semibold">Score Canvas Answers</h2>
+                    <div id="studentInfo" class="text-gray-600 mt-1"></div>
+                </div>
+                <button 
+                    id="backToListBtn"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                >
+                    Back to List
+                </button>
+            </div>
+
+            <!-- Canvas Answers Grid -->
+            <div id="canvasAnswersGrid" class="grid gap-6">
+                <!-- Canvas answers will be populated here -->
+            </div>
+
+            <!-- Save All Scores Button -->
+            <div class="mt-8 text-center">
+                <button 
+                    id="saveAllScoresBtn"
+                    class="px-8 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 mx-auto"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Save All Scores
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <span id="errorText"></span>
+        </div>
+    </div>
+
+    <script src="/shared/admin-checking.js">
+    </script>
+</body>
+</html>

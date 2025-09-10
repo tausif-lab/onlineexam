@@ -1,0 +1,345 @@
+
+<!--
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Online Exam</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f2f5;
+    }
+    .login-box {
+      max-width: 400px;
+      margin: 80px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .alert {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <h3 class="text-center mb-4">Login</h3>
+    <form id="loginForm">
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+      </div>
+     
+      <div class="mb-3">
+        <label>Password</label>
+        <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+      </div>
+      <div class="mb-3">
+        <label>Role</label>
+        <select id="role" class="form-select" required>
+          <option value="">Select Role</option>
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+      <p class="text-center mt-3">Don't have an account as University Admin/Student? <a href="/register">Register</a></p>
+      <p class="text-center mt-3">Don't have an account as Normal Admin/Student? <a href="/register-coaching">Register</a></p>
+    </form>
+    <div id="message"></div>
+  </div>
+
+  <script>
+   
+
+    
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const role = document.getElementById('role').value;
+    const messageDiv = document.getElementById('message');
+
+    messageDiv.innerHTML = '';
+    if (!email || !password || !role) {
+      showMessage('Please fill in all fields', 'danger');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email, password, role })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        showMessage('Login successful! Redirecting...', 'success');
+
+        // Use replace to avoid history loops
+        setTimeout(() => {
+          location.replace(data.redirectUrl);
+        }, 600);
+      } else {
+        showMessage(data.message || 'Login failed', 'danger');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      showMessage('Network error. Please try again.', 'danger');
+    }
+  });
+
+  function showMessage(message, type) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+  }
+
+  // Redirect only if we *really* have a logged-in user
+  window.addEventListener('load', function () {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // If not logged in or missing role, do nothing
+    if (!token || !user || !user.role) return;
+
+    const role = user.role;
+
+    // Build destination URL safely
+    let url;
+    if (user.collegeId && user.user1Id && user.branch) {
+      url = (role === 'admin')
+        ? `/admin-dashboard.html?collegeId=${encodeURIComponent(user.collegeId)}&user1Id=${encodeURIComponent(user.user1Id)}&branch=${encodeURIComponent(user.branch)}`
+        : `/student-dashboard.html?collegeId=${encodeURIComponent(user.collegeId)}&user1Id=${encodeURIComponent(user.user1Id)}&branch=${encodeURIComponent(user.branch)}`;
+    } else {
+      url = (role === 'admin')
+        ? `/admin-dashboard.html?Email=${encodeURIComponent(user.email)}&id=${encodeURIComponent(user._id)}`
+        : `/student-dashboard.html?Email=${encodeURIComponent(user.email)}&id=${encodeURIComponent(user._id)}`;
+    }
+
+    // Prevent repeated redirects in the same session
+    if (!sessionStorage.getItem('redirectedOnce')) {
+      sessionStorage.setItem('redirectedOnce', '1');
+      location.replace(url);
+    }
+  });
+
+
+  </script>
+
+</body>
+</html>-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Online Exam</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Background with bluish gradient */
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(165deg, #39a9d9, #526bd9, #9fa6c1);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* Glassmorphism login box */
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      padding: 35px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+      color: #fff;
+    }
+
+    .login-box h3 {
+      color: #e0f0ff;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #d2e9ff;
+    }
+
+    .form-control,
+    .form-select {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      border-radius: 12px;
+    }
+
+    .form-control::placeholder {
+      color: #cbd6e2;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      background: rgba(255, 255, 255, 0.25);
+      outline: none;
+      border-color: #4da8da;
+      box-shadow: 0 0 0 0.25rem rgba(77, 168, 218, 0.3);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4da8da, #0077b6);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0077b6, #023e8a);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 119, 182, 0.4);
+    }
+
+    .alert {
+      border-radius: 12px;
+    }
+
+    a {
+      color: #90e0ef;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #48cae4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <h3 class="text-center mb-4">Login</h3>
+    <form id="loginForm">
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+      </div>
+     
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Role</label>
+        <select id="role" class="form-select" required>
+          <option value="">Select Role</option>
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+      <p class="text-center mt-3">Don't have an account as University Admin/Student? <a href="/register">Register</a></p>
+      <p class="text-center mt-2">Don't have an account as Normal Admin/Student? <a href="/register-coaching">Register</a></p>
+    </form>
+    <div id="message"></div>
+  </div>
+  <script>
+   
+
+    
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+  
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      const messageDiv = document.getElementById('message');
+  
+      messageDiv.innerHTML = '';
+      if (!email || !password || !role) {
+        showMessage('Please fill in all fields', 'danger');
+        return;
+      }
+  
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email, password, role })
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showMessage('Login successful! Redirecting...', 'success');
+  
+          // Use replace to avoid history loops
+          setTimeout(() => {
+            location.replace(data.redirectUrl);
+          }, 600);
+        } else {
+          showMessage(data.message || 'Login failed', 'danger');
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        showMessage('Network error. Please try again.', 'danger');
+      }
+    });
+  
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+    }
+  
+    // Redirect only if we *really* have a logged-in user
+    window.addEventListener('load', function () {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+  
+      // If not logged in or missing role, do nothing
+      if (!token || !user || !user.role) return;
+  
+      const role = user.role;
+  
+      // Build destination URL safely
+      let url;
+      if (user.collegeId && user.user1Id && user.branch) {
+        url = (role === 'admin')
+          ? `/admin-dashboard.html?collegeId=${encodeURIComponent(user.collegeId)}&user1Id=${encodeURIComponent(user.user1Id)}&branch=${encodeURIComponent(user.branch)}`
+          : `/student-dashboard.html?collegeId=${encodeURIComponent(user.collegeId)}&user1Id=${encodeURIComponent(user.user1Id)}&branch=${encodeURIComponent(user.branch)}`;
+      } else {
+        url = (role === 'admin')
+          ? `/admin-dashboard.html?Email=${encodeURIComponent(user.email)}&id=${encodeURIComponent(user._id)}`
+          : `/student-dashboard.html?Email=${encodeURIComponent(user.email)}&id=${encodeURIComponent(user._id)}`;
+      }
+  
+      // Prevent repeated redirects in the same session
+      if (!sessionStorage.getItem('redirectedOnce')) {
+        sessionStorage.setItem('redirectedOnce', '1');
+        location.replace(url);
+      }
+    });
+  
+  
+    </script>
+  
+  </body>
+  </html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register - Online Exam System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+        .registration {
+            max-width: 400px;
+            margin: 80px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .alert {
+            margin-top: 15px;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="registration">
+      <h3 class="text-center mb-4">Registration</h3>
+      <form id="registrationForm">
+        <div class="mb-3">
+          <label>Full Name</label>
+          <input type="text" id="fullName" class="form-control" placeholder="Enter your full name" required>
+        </div>
+        <div class="mb-3">
+          <label>Email</label>
+          <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+        </div>
+        
+        
+        <div class="mb-3">
+          <label>Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Enter the password" required>
+        </div>
+        <div class="mb-3">
+          <label>Confirm Password</label>
+          <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm your password" required>
+        </div>
+        
+        <div class="mb-3">
+          <label>Role</label>
+          <select id="role" class="form-select" required>
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
+        <p class="text-center">Already registered? <a href="/login">Login</a></p>
+      </form>
+      <div id="message"></div>
+    </div>
+
+    <script>
+      document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const fullName = document.getElementById('fullName').value;
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const role = document.getElementById('role').value;
+        ;
+        const messageDiv = document.getElementById('message');
+        
+        // Clear previous messages
+        messageDiv.innerHTML = '';
+        
+        // Client-side validation
+        if (!fullName || !email || !password || !confirmPassword || !role ) {
+          showMessage('Please fill in all fields', 'danger');
+          return;
+        }
+        
+        if (password !== confirmPassword) {
+          showMessage('Passwords do not match', 'danger');
+          return;
+        }
+        
+        if (password.length < 6) {
+          showMessage('Password must be at least 6 characters long', 'danger');
+          return;
+        }
+        
+        try {
+          const response = await fetch('/api/register-coaching', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ fullName, email,  password, confirmPassword, role })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            showMessage('Registration successful! Redirecting to login...', 'success');
+            
+            // Clear form
+            document.getElementById('registrationForm').reset();
+            
+            // Redirect to login page after 2 seconds
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 2000);
+          } else {
+            showMessage(data.message || 'Registration failed', 'danger');
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+          showMessage('Network error. Please try again.', 'danger');
+        }
+      });
+      
+      function showMessage(message, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      }
+      
+      // Check if user is already logged in
+      window.addEventListener('load', function() {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        if (token && user.role) {
+          // Redirect to appropriate dashboard
+          if (user.role === 'admin') {
+            window.location.href = '/admin-dashboard';
+          } else {
+            window.location.href = '/student-dashboard';
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

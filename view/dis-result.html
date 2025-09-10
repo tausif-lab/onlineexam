@@ -1,0 +1,822 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descriptive Answers Result</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Add your existing CSS styling here */
+        .result-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .score-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .descriptive-answer {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .scored { background: #e8f5e8; }
+        .not-scored { background: #fff3cd; }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading descriptive results...</p>
+        </div>
+
+        <div id="error-container" style="display: none;">
+            <div class="error-message">
+                <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                <p id="error-message"></p>
+                <button onclick="goBack()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </button>
+            </div>
+        </div>
+
+        <div id="result-content" style="display: none;">
+            <!-- Content will be populated by JavaScript --
+        </div>
+    </div>
+
+    <script>
+        // Get examId from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('examId');
+        
+        // Security check - validate examId format
+        if (!examId || !isValidObjectId(examId)) {
+            showError('Invalid exam ID provided');
+        } else {
+            fetchDescriptiveResult(examId);
+        }
+
+        function isValidObjectId(id) {
+            return /^[0-9a-fA-F]{24}$/.test(id);
+        }
+
+        async function fetchDescriptiveResult(examId) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const response = await fetch(`/api/results/descriptive-result/${examId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to fetch results');
+                }
+
+                displayResults(data.data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+            }
+        }
+
+        function displayResults(resultData) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result-content').style.display = 'block';
+
+            const content = `
+                <h2><i class="fas fa-file-alt"></i> Descriptive Answers Result</h2>
+                
+                <div class="exam-info">
+                    <h3>Exam: ${resultData.examInfo.title}</h3>
+                    <p>Category: ${resultData.examInfo.category}</p>
+                    <p>Submitted: ${new Date(resultData.submissionInfo.submittedAt).toLocaleString()}</p>
+                </div>
+
+                <div class="score-card">
+                    <h3>Score Summary</h3>
+                    <div class="score-grid">
+                        <div>MCQ Score: ${resultData.scores.mcqScore}/${resultData.scores.totalMcqQuestions}</div>
+                        <div>Descriptive Score: ${resultData.scores.descriptiveScore}/${resultData.scores.maxDescriptiveScore}</div>
+                        <div>Final Score: ${resultData.scores.finalScore}</div>
+                        <div>Final Percentage: ${resultData.scores.finalPercentage}%</div>
+                    </div>
+                </div>
+
+                <div class="descriptive-section">
+                    <h3>Descriptive Answers Status</h3>
+                    <p>Total Questions: ${resultData.submissionInfo.totalDescriptiveQuestions}</p>
+                    <p>All Scored: ${resultData.allDescriptiveScored ? 'Yes' : 'No'}</p>
+                    
+                    ${resultData.descriptiveAnswers.map(answer => `
+                        <div class="descriptive-answer ${answer.isScored ? 'scored' : 'not-scored'}">
+                            <h4>Question ${answer.questionNumber}</h4>
+                            <div class="answer-status">
+                                ${answer.isScored ? 
+                                    `<div class="scored-info">
+                                        <p><strong>Score:</strong> ${answer.adminScore}/${answer.maxScore}</p>
+                                        ${answer.adminFeedback ? `<p><strong>Feedback:</strong> ${answer.adminFeedback}</p>` : ''}
+                                        <p><small>Scored on: ${new Date(answer.scoredAt).toLocaleString()}</small></p>
+                                    </div>` : 
+                                    `<p class="pending">⏳ Scoring pending</p>`
+                                }
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${resultData.pdfAvailable ? 
+                    `<div class="pdf-section">
+                        <button onclick="downloadPdf()" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download Descriptive Answers PDF
+                        </button>
+                    </div>` : ''
+                }
+
+                <div class="actions">
+                    <button onclick="goBack()" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('result-content').innerHTML = content;
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-container').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+
+        function goBack() {
+            history.back();
+        }
+
+        async function downloadPdf() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/results/descriptive-pdf/${examId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to download PDF');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `descriptive-answers-${examId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+            } catch (error) {
+                alert('Error downloading PDF: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descriptive Answers Result</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .result-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #2196F3;
+        }
+
+        .loading i {
+            font-size: 2em;
+            color: #2196F3;
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #f44336, #e53935);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+        }
+
+        .score-card h3 {
+            margin-top: 0;
+            font-size: 1.4em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .score-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .score-item .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .score-item .value {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .score-item.highlight {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        
+        .descriptive-answer {
+            border: 2px solid #E3F2FD;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .descriptive-answer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2196F3, #1976D2);
+        }
+
+        .descriptive-answer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.15);
+        }
+        
+        .scored { 
+            background: linear-gradient(135deg, #E8F5E8, #F0FFF0); 
+            border-color: #4CAF50;
+        }
+
+        .scored::before {
+            background: linear-gradient(90deg, #4CAF50, #45A049);
+        }
+        
+        .not-scored { 
+            background: linear-gradient(135deg, #FFF3CD, #FFFACD); 
+            border-color: #FF9800;
+        }
+
+        .not-scored::before {
+            background: linear-gradient(90deg, #FF9800, #F57C00);
+        }
+
+        .descriptive-answer h4 {
+            color: #1565C0;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .descriptive-answer h4 i {
+            margin-right: 8px;
+            color: #2196F3;
+        }
+
+        .answer-status {
+            margin-top: 15px;
+        }
+
+        .scored-info {
+            background: rgba(33, 150, 243, 0.05);
+            border: 2px solid #BBDEFB;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .score-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #1565C0;
+            margin-bottom: 15px;
+            text-align: center;
+            background: rgba(33, 150, 243, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .feedback-section {
+            margin-top: 15px;
+        }
+
+        .feedback-label {
+            font-weight: bold;
+            color: #1565C0;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feedback-label i {
+            margin-right: 8px;
+            color: #2196F3;
+        }
+
+        .feedback-content {
+            background: white;
+            border: 2px solid #E3F2FD;
+            border-radius: 8px;
+            padding: 12px;
+            color: #424242;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feedback-content.no-feedback {
+            color: #9E9E9E;
+            border-style: dashed;
+            font-style: italic;
+            border-color: #BDBDBD;
+        }
+
+        .pending {
+            color: #FF9800;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #FFB74D;
+        }
+
+        .pending i {
+            margin-right: 8px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .scored-timestamp {
+            font-size: 0.9em;
+            color: #757575;
+            margin-top: 10px;
+            text-align: right;
+            font-style: italic;
+        }
+
+        .exam-info {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #2196F3;
+        }
+
+        .exam-info h3 {
+            color: #1565C0;
+            margin-top: 0;
+        }
+
+        .descriptive-section h3 {
+            color: #1565C0;
+            border-bottom: 3px solid #2196F3;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #607D8B, #455A64);
+            color: white;
+            box-shadow: 0 4px 15px rgba(96, 125, 139, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(96, 125, 139, 0.4);
+        }
+
+        .pdf-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #E3F2FD, #F3E5F5);
+            border-radius: 10px;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #E9ECEF;
+        }
+
+        h2 {
+            color: #1565C0;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        h2 i {
+            color: #2196F3;
+            margin-right: 10px;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .summary-stats p {
+            margin: 0;
+            padding: 8px 12px;
+            background: rgba(33, 150, 243, 0.1);
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #1565C0;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .status-scored {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-pending {
+            background: #FF9800;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading descriptive results...</p>
+        </div>
+
+        <div id="error-container" style="display: none;">
+            <div class="error-message">
+                <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                <p id="error-message"></p>
+                <button onclick="goBack()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </button>
+            </div>
+        </div>
+
+        <div id="result-content" style="display: none;">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Get examId from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('examId');
+        
+        // Security check - validate examId format
+        if (!examId || !isValidObjectId(examId)) {
+            showError('Invalid exam ID provided');
+        } else {
+            fetchDescriptiveResult(examId);
+        }
+
+        function isValidObjectId(id) {
+            return /^[0-9a-fA-F]{24}$/.test(id);
+        }
+
+        async function fetchDescriptiveResult(examId) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const response = await fetch(`/api/results/descriptive-result/${examId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to fetch results');
+                }
+
+                displayResults(data.data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+            }
+        }
+
+        function displayResults(resultData) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result-content').style.display = 'block';
+
+            // Calculate descriptive scores from individual answers
+            let totalAdminScore = 0;
+            let totalMaxScore = 0;
+            let scoredQuestionsCount = 0;
+
+            resultData.descriptiveAnswers.forEach(answer => {
+                if (answer.isScored) {
+                    totalAdminScore += answer.adminScore || 0;
+                    totalMaxScore += answer.maxScore || 10;
+                    scoredQuestionsCount++;
+                }
+            });
+
+            const descriptivePercentage = totalMaxScore > 0 
+                ? ((totalAdminScore / totalMaxScore) * 100).toFixed(2)
+                : 0;
+
+            // Calculate combined total score and percentage
+            const combinedTotalScore = resultData.scores.mcqScore + totalAdminScore;
+            const combinedMaxScore = resultData.scores.totalMcqQuestions + totalMaxScore;
+            const combinedPercentage = combinedMaxScore > 0 
+                ? ((combinedTotalScore / combinedMaxScore) * 100).toFixed(2)
+                : 0;
+
+            const content = `
+                <h2><i class="fas fa-file-alt"></i> Descriptive Answers Result</h2>
+                
+                <div class="exam-info">
+                    <h3><i class="fas fa-graduation-cap"></i> ${resultData.examInfo.title}</h3>
+                    <p><i class="fas fa-folder"></i> <strong>Category:</strong> ${resultData.examInfo.category}</p>
+                    <p><i class="fas fa-clock"></i> <strong>Submitted:</strong> ${new Date(resultData.submissionInfo.submittedAt).toLocaleString()}</p>
+                </div>
+
+                <div class="score-card">
+                    <h3><i class="fas fa-chart-bar"></i> Score Summary</h3>
+                    <div class="score-grid">
+                        <div class="score-item">
+                            <div class="label">MCQ Score</div>
+                            <div class="value">${resultData.scores.mcqScore}/${resultData.scores.totalMcqQuestions}</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="label">MCQ Percentage</div>
+                            <div class="value">${resultData.scores.totalMcqQuestions > 0 ? ((resultData.scores.mcqScore / resultData.scores.totalMcqQuestions) * 100).toFixed(2) : 0}%</div>
+                        </div>
+                        <div class="score-item highlight">
+                            <div class="label">Descriptive Score</div>
+                            <div class="value">${totalAdminScore}/${totalMaxScore}</div>
+                        </div>
+                        <div class="score-item highlight">
+                            <div class="label">Descriptive Percentage</div>
+                            <div class="value">${descriptivePercentage}%</div>
+                        </div>
+                        <div class="score-item highlight">
+                            <div class="label">Questions Scored</div>
+                            <div class="value">${scoredQuestionsCount}/${resultData.submissionInfo.totalDescriptiveQuestions}</div>
+                        </div>
+                        <div class="score-item highlight">
+                            <div class="label">Total Score</div>
+                            <div class="value">${combinedTotalScore}/${combinedMaxScore}</div>
+                        </div>
+                        <div class="score-item highlight">
+                            <div class="label">Overall Percentage</div>
+                            <div class="value">${combinedPercentage}%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="descriptive-section">
+                    <h3><i class="fas fa-edit"></i> Descriptive Answers Status</h3>
+                    <div class="summary-stats">
+                        <p><strong>Total Questions:</strong> ${resultData.submissionInfo.totalDescriptiveQuestions}</p>
+                        <p><strong>Questions Scored:</strong> ${scoredQuestionsCount}</p>
+                        <p><strong>All Scored:</strong> ${resultData.allDescriptiveScored ? 'Yes' : 'No'}</p>
+                    </div>
+                    
+                    ${resultData.descriptiveAnswers.map(answer => `
+                        <div class="descriptive-answer ${answer.isScored ? 'scored' : 'not-scored'}">
+                            <h4>
+                                <i class="fas fa-question-circle"></i> 
+                                Question ${answer.questionNumber}
+                                <span class="status-badge ${answer.isScored ? 'status-scored' : 'status-pending'}">
+                                    ${answer.isScored ? 'Scored' : 'Pending'}
+                                </span>
+                            </h4>
+                            <div class="answer-status">
+                                ${answer.isScored ? 
+                                    `<div class="scored-info">
+                                        <div class="score-display">
+                                            <i class="fas fa-trophy"></i> Score: ${answer.adminScore || 0}/${answer.maxScore || 10}
+                                            (${answer.maxScore > 0 ? ((answer.adminScore || 0) / answer.maxScore * 100).toFixed(1) : 0}%)
+                                        </div>
+                                        <div class="feedback-section">
+                                            <div class="feedback-label">
+                                                <i class="fas fa-comment"></i> Admin Feedback:
+                                            </div>
+                                            <div class="feedback-content ${!answer.adminFeedback || answer.adminFeedback.trim() === '' ? 'no-feedback' : ''}">
+                                                ${answer.adminFeedback && answer.adminFeedback.trim() !== '' ? answer.adminFeedback : 'No feedback provided'}
+                                            </div>
+                                        </div>
+                                        <div class="scored-timestamp">
+                                            <i class="fas fa-calendar-alt"></i> Scored on: ${new Date(answer.scoredAt).toLocaleString()}
+                                        </div>
+                                    </div>` : 
+                                    `<div class="pending">
+                                        <i class="fas fa-hourglass-half"></i> Scoring pending - awaiting admin review
+                                    </div>`
+                                }
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${resultData.pdfAvailable ? 
+                    `<div class="pdf-section">
+                        <button onclick="downloadPdf()" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download Descriptive Answers PDF
+                        </button>
+                    </div>` : ''
+                }
+
+                <div class="actions">
+                    <button onclick="goBack()" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('result-content').innerHTML = content;
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-container').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+
+        function goBack() {
+            history.back();
+        }
+
+        async function downloadPdf() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/results/descriptive-pdf/${examId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to download PDF');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `descriptive-answers-${examId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeURL(url);
+
+            } catch (error) {
+                alert('Error downloading PDF: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
