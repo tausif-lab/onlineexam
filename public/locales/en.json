@@ -1,0 +1,45 @@
+{
+    "app": {
+        "title": "ExamPro - Online Exam Platform",
+        "brand": "ExamPro"
+    },
+    "nav": {
+        "features": "Features",
+        "howItWorks": "How It Works",
+        "contact": "Contact",
+        "login": "Login"
+    },
+    "front": {
+        "heroTitle": "Transform Education with",
+        "heroHighlight": "Smart Online Exams",
+        "heroSubtitle": "Empowering universities, coaching institutes, and parents with a comprehensive online examination platform that makes testing simple, secure, and stress-free.",
+        "cta": "Get Started Today",
+        "choosePath": "Choose Your Path",
+        "choosePathDesc": "Select your category to get started with our tailored examination solutions",
+        "universityTitle": "University",
+        "universityDesc": "Comprehensive examination management for higher education institutions with advanced proctoring and analytics.",
+        "coachingTitle": "Coaching",
+        "coachingDesc": "Streamlined testing solutions for coaching institutes with performance tracking and progress monitoring.",
+        "parentsTitle": "Parents",
+        "parentsDesc": "Support your child's learning journey with personalized assessments and detailed progress reports.",
+        "howItWorks": "How It Works",
+        "howItWorksDesc": "Simple steps to get started with our online examination platform",
+        "step1Title": "Register",
+        "step1Desc": "Create your account and choose your category",
+        "step2Title": "Setup",
+        "step2Desc": "Configure your exams and customize settings",
+        "step3Title": "Take Exam",
+        "step3Desc": "Students take exams with secure proctoring",
+        "step4Title": "Get Results",
+        "step4Desc": "Receive detailed analytics and reports"
+    },
+    "footer": {
+        "tagline": "Transforming education through innovative online examination solutions.",
+        "quickLinks": "Quick Links",
+        "pricing": "Pricing",
+        "support": "Support",
+        "categories": "Categories",
+        "contact": "Contact Info",
+        "copyright": "© 2025 ExamPro. All rights reserved. | Privacy Policy | Terms of Service"
+    }
+}
