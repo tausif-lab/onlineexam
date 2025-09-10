@@ -4,7 +4,7 @@ const { authenticateToken } = require('../middleware/auth');
 const router = express.Router();
 
 // Violation model (you may need to create this)
-const Violation = require('../models/Violation');
+const Violation = require('../models/violation');
 
 /**
  * Log a proctoring violation
