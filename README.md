@@ -83,4 +83,11 @@ Our development followed a structured, modular workflow for efficiency and maint
 | **Admin Panel** | Manage users, exams, and reports |
 
 ---
+## 👥 Contributors
+
+| Name | Role | Major Contributions |
+|------|------|----------------------|
+| **Tausif Khan** | Full-Stack Developer |Backend integration, database design, authentication, deployment |
+| **Priyansh Sao** | Frontend Developer | UI Designer|
+| **[Meghmala Singh]** | Computer Vision Engineer | Eye movement detection, face recognition, AI module integration |
 
