@@ -9,7 +9,7 @@ The system supports **students, teachers, parents, and admins**, reducing manual
 ## 🏗️ System Architecture & Design
 
 ### 🔹 High-Level Architecture
-
+```mermaid
 flowchart TD
 
 A[Client Layer - Next.js Frontend] --> B[API Layer - Express.js Backend]
@@ -31,8 +31,10 @@ F --> H[Analytics & Reports Engine]
 H --> A
 
 
-## 🔁 User Flow
+```
 
+## 🔁 User Flow
+```mermaid
 flowchart TD
 
 A[User Login / Signup] --> B[JWT Authentication]
@@ -42,11 +44,12 @@ B --> C{User Role}
 C -->|Teacher| D[Create Exam & Questions]
 C -->|Student| E[Attempt Exam]
 C -->|Parent| F[View Reports]
-C -->|Admin| G[Manage System]
+
 
 D --> H[Store Exams in MongoDB]
 
-E --> I[Start Exam Timer]
+E --> Z[Start Exam Timer]
+Z --> I[Eyemovement Detection & Security]
 I --> J[Submit Answers]
 J --> K[Auto Evaluation Engine]
 
@@ -54,14 +57,13 @@ K --> L[Store Results in Database]
 
 F --> M[Fetch Student Performance]
 
-G --> N[Monitor Users & Exams]
 
 L --> O[Analytics Dashboard]
 M --> O
-N --> O
+H --> O
 
 O --> P[Real-Time Insights to Users]
-
+```
 ## 🚀 Key Features
 
 ### 👩‍🏫 Teachers
