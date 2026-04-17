@@ -10,90 +10,57 @@ The system supports **students, teachers, parents, and admins**, reducing manual
 
 ### 🔹 High-Level Architecture
 
-The system follows a **3-tier client-server architecture**:
+flowchart TD
 
-- **Frontend (Client Layer)**
-  - Built with **Next.js + Tailwind CSS**
-  - Handles UI, exam interface, timers, dashboards
-  - Communicates with backend via REST APIs
+A[Client Layer - Next.js Frontend] --> B[API Layer - Express.js Backend]
 
-- **Backend (Application Layer)**
-  - Built with **Node.js + Express.js**
-  - Handles authentication, exam logic, evaluation, RBAC
-  - Middleware-based request validation and authorization
+B --> C[Authentication Service - JWT]
+B --> D[Exam Service - Logic & Evaluation]
+B --> E[User Service - Role Management]
 
-- **Database (Data Layer)**
-  - **MongoDB (Mongoose ORM)**
-  - Stores users, exams, questions, and results
+C --> F[MongoDB Database]
+D --> F
+E --> F
 
----
+A --> G[Proctoring Module - Eye Tracking / Face Detection]
 
-### 🔹 Authentication & Authorization Flow
+G --> B
 
-1. User logs in with credentials  
-2. Server validates and generates **JWT token**  
-3. Token stored on client  
-4. Each request includes token  
-5. Backend verifies token using middleware  
-6. Role-based access control applied  
+F --> H[Analytics & Reports Engine]
 
----
+H --> A
 
-### 🔹 Exam Execution Flow
-
-1. Student starts exam  
-2. Questions fetched via API  
-3. Timer initialized (client + server validation)  
-4. Answers stored temporarily  
-5. On submission:
-   - Auto-evaluation triggered  
-   - Negative marking applied  
-6. Results stored and analytics generated  
-
----
-
-### 🔹 Proctoring (Basic Monitoring)
-
-- Eye movement detection using browser-based tracking (prototype level)  
-- Detects tab switching and suspicious behavior patterns  
-- Face authentication used during login (if enabled)  
-
-> Note: Monitoring features are implemented at a basic/prototype level.
-
----
 
 ## 🔁 User Flow
 
-### 👩‍🏫 Teacher Flow
-1. Login → Dashboard  
-2. Create exam (questions, duration, marking)  
-3. Publish exam  
-4. View results and analytics  
+flowchart TD
 
----
+A[User Login / Signup] --> B[JWT Authentication]
 
-### 🧑‍🎓 Student Flow
-1. Login / Verification  
-2. View available exams  
-3. Start exam (timer + monitoring)  
-4. Submit exam  
-5. View score and performance analysis  
+B --> C{User Role}
 
----
+C -->|Teacher| D[Create Exam & Questions]
+C -->|Student| E[Attempt Exam]
+C -->|Parent| F[View Reports]
+C -->|Admin| G[Manage System]
 
-### 👨‍👩‍👧 Parent Flow
-1. Login  
-2. Monitor student performance  
-3. View reports and alerts  
+D --> H[Store Exams in MongoDB]
 
----
+E --> I[Start Exam Timer]
+I --> J[Submit Answers]
+J --> K[Auto Evaluation Engine]
 
-### 🛡️ Admin Flow
-1. Manage users (CRUD)  
-2. Monitor exams and reports  
-3. Control system-level operations  
+K --> L[Store Results in Database]
 
----
+F --> M[Fetch Student Performance]
+
+G --> N[Monitor Users & Exams]
+
+L --> O[Analytics Dashboard]
+M --> O
+N --> O
+
+O --> P[Real-Time Insights to Users]
 
 ## 🚀 Key Features
 
